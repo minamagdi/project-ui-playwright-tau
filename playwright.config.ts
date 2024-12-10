@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import baseUrlEnvironment from './utils/baseUrlEnvironment';
 
 /**
  * Read environment variables from file.
@@ -12,13 +13,16 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
+  //testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
+  timeout: 7000,
+
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  // retries: process.env.CI ? 2 : 0,
+  retries:0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -38,16 +42,61 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
     {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      name: 'all-browser-all tests',
+      use: {
+        baseURL: 'https://playwright.dev',
+        ...devices['Desktop Chrome']
+      }
     },
 
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      name: 'all-browsers-and-tests',
+      use: { 
+        baseURL: 'https://playwright.dev/',
+         ...devices['Desktop Safari']
+      },
     },
+
+    {
+      name: 'all-browsers-and-tests',
+      use: { 
+        baseURL: 'https://playwright.dev/',
+         ...devices['Desktop Firefox']
+      },
+    },
+
+     // Example only
+     {
+      name: 'local',
+      use: { 
+        baseURL: baseUrlEnvironment.local.home,
+      },
+    },
+
+    // Example only
+    {
+      name: 'ci',
+      use: { 
+         baseURL: process.env.CI
+          ? baseUrlEnvironment.ci.prefix + process.env.GITHUB_REF_NAME + baseUrlEnvironment.ci.suffix //https://dev-myapp-chapter-2.mydomain.com
+          : baseUrlEnvironment.staging.home,
+      },
+      /**
+       * GitHub variables: https://docs.github.com/en/actions/learn-github-actions/variables
+       * GitLab variables: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html#predefined-variables-reference
+       */
+    },
+
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
+
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
 
     /* Test against mobile viewports. */
     // {
